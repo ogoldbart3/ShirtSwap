@@ -247,19 +247,44 @@ print circles
 
 img2 = cv2.imread('Dispatcher.png')
 
-image_1_kp = [[158, 286], [278, 294], [156, 410], [276, 416], [152, 562], [280, 556]]
-image_2_kp = [[0, 0], [img2.shape[1],0], [0, img2.shape[0] / 2], [img2.shape[1], img2.shape[0] / 2], [0, img2.shape[0]], [img2.shape[1], img2.shape[0]]]
+# image_1_kp = [[158, 286], [278, 294], [156, 410], [276, 416], [152, 562], [280, 556]]
+# image_1_kp = [[158-30, 286-30], [278+37, 294-37], [156-33, 410+33], [276+38, 416+38]]
+
+image_1_kp = [[158, 286], [278, 294], [156, 410], [276, 416]]
+# image_2_kp = [[0, 0], [img2.shape[1],0], [0, img2.shape[0] / 2], [img2.shape[1], img2.shape[0] / 2], [0, img2.shape[0]], [img2.shape[1], img2.shape[0]]]
+image_2_kp = [[0, 0], [img2.shape[1],0], [0, img2.shape[0] / 2], [img2.shape[1], img2.shape[0] / 2]]
+
 
 H = findHomography(image_2_kp, image_1_kp)
 print H
 # finalImage = warpImagePair(img2, img, H)
-finalImage = cv2.warpPerspective(img2,H,(500, 1000))
-cv2.imwrite( 'final.png', finalImage)
+
+# bottomRight = np.dot( homography, [[img2.shape[0]], [img2.shape[1]], [1]] )
+
+finalImage = cv2.warpPerspective(img2,H,(img.shape[1], img.shape[0]))
 
 
-# cv2.imshow('detected circles',cimg)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
+
+
+cv2.imwrite( 'warped.png', finalImage)
+
+print img[0,10]
+
+colorOriginal = cv2.imread('testgreenAw.png')
+
+for y in range(0, colorOriginal.shape[0]):
+	for x in range(0, colorOriginal.shape[1]):
+		if ( finalImage[y, x][0] != 0 ) and ( finalImage[y, x][1] != 0 ) and ( finalImage[y, x][2] != 0 ):
+			colorOriginal[y,x][0] = finalImage[y,x][0]
+			colorOriginal[y,x][1] = finalImage[y,x][1]
+			colorOriginal[y,x][2] = finalImage[y,x][2]
+
+
+cv2.imwrite( 'final.png', colorOriginal)
+
+cv2.imshow('detected circles',colorOriginal)
+cv2.waitKey(0)
+cv2.destroyAllWindows()
 
 
 # cv2.imshow('image',img2)
