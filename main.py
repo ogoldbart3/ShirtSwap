@@ -246,27 +246,32 @@ print circles
 
 
 img2 = cv2.imread('Dispatcher.png')
-
+img2A = img2[0:len(img2)/2,:]
+img2B = img2[len(img2)/2:len(img2),:]
 # image_1_kp = [[158, 286], [278, 294], [156, 410], [276, 416], [152, 562], [280, 556]]
 # image_1_kp = [[158-30, 286-30], [278+37, 294-37], [156-33, 410+33], [276+38, 416+38]]
 
-image_1_kp = [[158, 286], [278, 294], [156, 410], [276, 416]]
+image_1_kpA = [[158, 286], [278, 294], [156, 410], [276, 416]]
+image_1_kpB = [[156, 410], [276, 416], [152, 562], [280, 556]]
+
 # image_2_kp = [[0, 0], [img2.shape[1],0], [0, img2.shape[0] / 2], [img2.shape[1], img2.shape[0] / 2], [0, img2.shape[0]], [img2.shape[1], img2.shape[0]]]
-image_2_kp = [[0, 0], [img2.shape[1],0], [0, img2.shape[0] / 2], [img2.shape[1], img2.shape[0] / 2]]
+image_2_kpA = [[0, 0], [img2A.shape[1],0], [0, img2A.shape[0]], [img2A.shape[1], img2A.shape[0]]]
+image_2_kpB = [[0, 0], [img2B.shape[1],0], [0, img2B.shape[0]], [img2B.shape[1], img2B.shape[0]]]
 
-
-H = findHomography(image_2_kp, image_1_kp)
-print H
+HA = findHomography(image_2_kpA, image_1_kpA)
+HB = findHomography(image_2_kpB, image_1_kpB)
+# print H
 # finalImage = warpImagePair(img2, img, H)
 
 # bottomRight = np.dot( homography, [[img2.shape[0]], [img2.shape[1]], [1]] )
 
-finalImage = cv2.warpPerspective(img2,H,(img.shape[1], img.shape[0]))
+finalImageA = cv2.warpPerspective(img2A,HA,(img.shape[1], img.shape[0]))
+finalImageB = cv2.warpPerspective(img2B,HB,(img.shape[1], img.shape[0]))
 
 
 
 
-cv2.imwrite( 'warped.png', finalImage)
+# cv2.imwrite( 'warped.png', finalImage)
 
 print img[0,10]
 
@@ -274,10 +279,18 @@ colorOriginal = cv2.imread('testgreenAw.png')
 
 for y in range(0, colorOriginal.shape[0]):
 	for x in range(0, colorOriginal.shape[1]):
-		if ( finalImage[y, x][0] != 0 ) and ( finalImage[y, x][1] != 0 ) and ( finalImage[y, x][2] != 0 ):
-			colorOriginal[y,x][0] = finalImage[y,x][0]
-			colorOriginal[y,x][1] = finalImage[y,x][1]
-			colorOriginal[y,x][2] = finalImage[y,x][2]
+		if ( finalImageA[y, x][0] != 0 ) and ( finalImageA[y, x][1] != 0 ) and ( finalImageA[y, x][2] != 0 ):
+			colorOriginal[y,x][0] = finalImageA[y,x][0]
+			colorOriginal[y,x][1] = finalImageA[y,x][1]
+			colorOriginal[y,x][2] = finalImageA[y,x][2]
+
+
+for y in range(0, colorOriginal.shape[0]):
+	for x in range(0, colorOriginal.shape[1]):
+		if ( finalImageB[y, x][0] != 0 ) and ( finalImageB[y, x][1] != 0 ) and ( finalImageB[y, x][2] != 0 ):
+			colorOriginal[y,x][0] = finalImageB[y,x][0]
+			colorOriginal[y,x][1] = finalImageB[y,x][1]
+			colorOriginal[y,x][2] = finalImageB[y,x][2]
 
 
 cv2.imwrite( 'final.png', colorOriginal)
