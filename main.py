@@ -20,8 +20,12 @@ cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
 # cimg = img[:,:,1]
 
 
+# circles = cv2.HoughCircles(img,cv2.HOUGH_GRADIENT,1,20,
+#                             param1=50,param2=30,minRadius=0,maxRadius=50)
+
+
 circles = cv2.HoughCircles(img,cv2.HOUGH_GRADIENT,1,20,
-                            param1=50,param2=30,minRadius=0,maxRadius=50)
+                            param1=30,param2=30,minRadius=0,maxRadius=40)
 
 circles = np.uint16(np.around(circles))
 for i in circles[0,:]:
