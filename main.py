@@ -224,58 +224,46 @@ def order_points(pts):
 	# return the ordered coordinates
 	return rect
 
-img = cv2.imread('testgreenAw.png')
-img = img[:,:,1]
-img = cv2.medianBlur(img,5)
+img = cv2.imread('bean.png')
+# img = img[:,:,1]
+# img = cv2.medianBlur(img,5)
 
-cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
+# cimg = cv2.cvtColor(img,cv2.COLOR_GRAY2BGR)
 
-circles = cv2.HoughCircles(img,cv2.HOUGH_GRADIENT,1,20,
-                            param1=80,param2=30,minRadius=0,maxRadius=40)
+# circles = cv2.HoughCircles(img,cv2.HOUGH_GRADIENT,1,20,
+#                             param1=80,param2=30,minRadius=0,maxRadius=40)
 
-circles = np.uint16(np.around(circles))
-for i in circles[0,:]:
-    # draw the outer circle
-    cv2.circle(cimg,(i[0],i[1]),i[2],(0,255,0),2)
-    # draw the center of the circle
-    cv2.circle(cimg,(i[0],i[1]),2,(0,0,255),3)
+# circles = np.uint16(np.around(circles))
+# for i in circles[0,:]:
+#     # draw the outer circle
+#     cv2.circle(cimg,(i[0],i[1]),i[2],(0,255,0),2)
+#     # draw the center of the circle
+#     cv2.circle(cimg,(i[0],i[1]),2,(0,0,255),3)
 
-print circles
+# print circles
 
-# findHomography(image_1_kp, image_2_kp, matches)
+# cv2.imshow('detected circles',cimg)
+# cv2.waitKey(0)
+# cv2.destroyAllWindows()
 
 
 img2 = cv2.imread('Dispatcher.png')
 img2A = img2[0:len(img2)/2,:]
 img2B = img2[len(img2)/2:len(img2),:]
-# image_1_kp = [[158, 286], [278, 294], [156, 410], [276, 416], [152, 562], [280, 556]]
-# image_1_kp = [[158-30, 286-30], [278+37, 294-37], [156-33, 410+33], [276+38, 416+38]]
 
-image_1_kpA = [[158, 286], [278, 294], [156, 410], [276, 416]]
-image_1_kpB = [[156, 410], [276, 416], [152, 562], [280, 556]]
+image_1_kpA = [[123, 340], [194, 299], [165, 385], [238, 359]]
+image_1_kpB = [[165, 385], [238, 359], [178, 443], [258, 445]]
 
-# image_2_kp = [[0, 0], [img2.shape[1],0], [0, img2.shape[0] / 2], [img2.shape[1], img2.shape[0] / 2], [0, img2.shape[0]], [img2.shape[1], img2.shape[0]]]
 image_2_kpA = [[0, 0], [img2A.shape[1],0], [0, img2A.shape[0]], [img2A.shape[1], img2A.shape[0]]]
 image_2_kpB = [[0, 0], [img2B.shape[1],0], [0, img2B.shape[0]], [img2B.shape[1], img2B.shape[0]]]
 
 HA = findHomography(image_2_kpA, image_1_kpA)
 HB = findHomography(image_2_kpB, image_1_kpB)
-# print H
-# finalImage = warpImagePair(img2, img, H)
-
-# bottomRight = np.dot( homography, [[img2.shape[0]], [img2.shape[1]], [1]] )
 
 finalImageA = cv2.warpPerspective(img2A,HA,(img.shape[1], img.shape[0]))
 finalImageB = cv2.warpPerspective(img2B,HB,(img.shape[1], img.shape[0]))
 
-
-
-
-# cv2.imwrite( 'warped.png', finalImage)
-
-print img[0,10]
-
-colorOriginal = cv2.imread('testgreenAw.png')
+colorOriginal = cv2.imread('bean.png')
 
 for y in range(0, colorOriginal.shape[0]):
 	for x in range(0, colorOriginal.shape[1]):
@@ -298,33 +286,3 @@ cv2.imwrite( 'final.png', colorOriginal)
 cv2.imshow('detected circles',colorOriginal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-
-# cv2.imshow('image',img2)
-
-# newFridge = np.zeros((img2.shape[1], img2.shape[0]), dtype=np.int)
-# warped_image = cv2.warpPerspective(image_1,combination_matrix,(x_max - x_min, y_max - y_min))
-
-# newWarpedImage = cv2.warpPerspective(img2, M, (img2.shape[1], img2.shape[0]))
-
-# test = [[circles[0][0][0], circles[0][0][1]]]
-
-# for i in range(1, len(circles[0])):
-# 	print circles[0][i]
-# 	for j in range( 0, len(test)):
-# 		if ( circles[0][i][0] * circles[0][i][0] + circles[0][i][1] * circles[0][i][1] > test[j][0] * test[j][0] + test[j][1] * test[j][1]):
-# 			test.insert(j, [circles[0][i][0], circles[0][i][1]] )
-			# print "h"
-
-# print topCircles
-# print circles[0][0]
-# print test
-
-# cv2.imshow('image', img2)
-
-# M = cv2.getPerspectiveTransform()
-
-# cv2.imshow('image', finalImage)
-# cv2.waitKey(0)
-# cv2.destroyAllWindows()
-
