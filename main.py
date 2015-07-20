@@ -5,6 +5,9 @@ import cv2
 import scipy.signal
 import argparse
 
+
+points = []
+
 def addNewChunk(originalImage, warpedImage):
     for y in range(0, originalImage.shape[0]):
         for x in range(0, originalImage.shape[1]):
@@ -137,6 +140,19 @@ def dropOffFinalImage( xChunks, yChunks, displayImage, originalImage, swapImage,
         displayImage = addNewChunk(displayImage, finalImage)
     return displayImage
 
+def click(event, x, y, flags, param):
+    # grab references to the global variables
+    global points
+    if event == cv2.EVENT_LBUTTONUP:
+        # record the ending (x, y) coordinates and indicate that
+        # the cropping operation is finished
+        points.append([x, y])
+ 
+        print points
+        # draw a rectangle around the region of interest
+        # cv2.rectangle(image, refPt[0], refPt[1], (0, 255, 0), 2)
+        # cv2.imshow("image", image)
+    # print x, y
 
 
 # points = [[123, 340], [194, 299], [165, 385], [238, 359], [178, 443], [258, 445]]
@@ -161,13 +177,29 @@ x = int(args["xchunks"])
 y = int(args["ychunks"])
 
 
-pointsForGood3 = [[116,293], [139,258], [148,228], [146,320], [168,286], [191,254], [166,337], [193,313], [214,286], [168,371], [202,359], [228,330]]
+cv2.namedWindow("image")
+cv2.setMouseCallback("image", click)
 
-# img = cv2.imread('good3.png')
-# img2 = cv2.imread('joebro.png')
-# colorOriginal = cv2.imread('good3.png')
 
-colorOriginal = dropOffFinalImage(x,y,colorOriginal, image, swap, pointsForGood3)
+
+while len(points) < (x + 1) * (y + 1):
+    # display the image and wait for a keypress
+    cv2.imshow("image", image)
+    key = cv2.waitKey(1) & 0xFF
+ 
+    # if the 'r' key is pressed, reset the cropping region
+    if key == ord("r"):
+        image = clone.copy()
+ 
+    # if the 'c' key is pressed, break from the loop
+    elif key == ord("c"):
+        break
+
+cv2.destroyAllWindows()
+
+# pointsForGood3 = [[116,293], [139,258], [148,228], [146,320], [168,286], [191,254], [166,337], [193,313], [214,286], [168,371], [202,359], [228,330]]
+
+colorOriginal = dropOffFinalImage(x,y,colorOriginal, image, swap, points)
 
 cv2.imwrite( 'final.png', colorOriginal)
 
