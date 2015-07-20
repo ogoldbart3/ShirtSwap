@@ -144,23 +144,11 @@ def click(event, x, y, flags, param):
     # grab references to the global variables
     global points
     if event == cv2.EVENT_LBUTTONUP:
-        # record the ending (x, y) coordinates and indicate that
-        # the cropping operation is finished
         points.append([x, y])
  
-        print points
-        # draw a rectangle around the region of interest
-        # cv2.rectangle(image, refPt[0], refPt[1], (0, 255, 0), 2)
-        # cv2.imshow("image", image)
-    # print x, y
-
-
-# points = [[123, 340], [194, 299], [165, 385], [238, 359], [178, 443], [258, 445]]
-# points = [[123, 340], [154,305], [194, 299], [165, 385], [197,363], [238, 359], [178, 443], [212,443], [258, 445]]
-# pointsForBean = [[168, 282], [192,259], [208, 237], [193, 300], [207,280], [226, 264], [205, 332], [219,304], [235, 298], [200,347], [224,327], [240,317]]
+        print [x, y]
 
 # python main.py -i good3.png -s jagface.png -x 2 -y 3
-
 
 ap = argparse.ArgumentParser()
 ap.add_argument("-s", "--swap", required=True, help="Path to the image")
