@@ -265,17 +265,25 @@ def createData(xChunks, yChunks, imageToBreak, points):
     for i in range(0, xChunks * yChunks):
         image_1_kp.append([points[i + i / xChunks],points[i + i / xChunks + 1],points[i + i / xChunks + xChunks + 1],points[i + i / xChunks + xChunks + 2]])
 
-    return image_1_kp
+
+    yLen = imageToBreak.shape[0]
+    xLen = imageToBreak.shape[1]
+
+
+            # imageBroken.append(imageToBreak[0:len(imageToBreak)/2,:])
+            # imageBroken.append(imageToBreak[len(imageToBreak)/2:len(imageToBreak),:])
+
+    imageBroken = []
+    for yChunk in range(0, yLen, yLen / yChunks):
+        for xChunk in range(0, xLen, xLen / xChunks):
+            imageBroken.append(imageToBreak[yChunk:yChunk + yLen / yChunks, xChunk:xChunk + xLen / xChunks])
+
+    return image_1_kp, imageBroken
 
 # print createData(1,2,img2,points)
 
 
-
-
-img2 = [img2[0:len(img2)/2,:],img2[len(img2)/2:len(img2),:]]
-
-# image_1_kp = [[[123, 340], [194, 299], [165, 385], [238, 359]],[[165, 385], [238, 359], [178, 443], [258, 445]]]
-image_1_kp = createData(1, 2, img2, points)
+image_1_kp, img2 = createData(1, 2, img2, points)
 # print image_1_kp
 
 image_2_kp = [[[0, 0], [img2[0].shape[1],0], [0, img2[0].shape[0]], [img2[0].shape[1], img2[0].shape[0]]],[[0, 0], [img2[1].shape[1],0], [0, img2[1].shape[0]], [img2[1].shape[1], img2[1].shape[0]]]]
