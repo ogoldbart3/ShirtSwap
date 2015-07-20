@@ -254,12 +254,6 @@ img = cv2.imread('bean.png')
 # cv2.destroyAllWindows()
 
 
-points = [[123, 340], [194, 299], [165, 385], [238, 359], [178, 443], [258, 445]]
-
-
-img2 = cv2.imread('Dispatcher.png')
-colorOriginal = cv2.imread('bean.png')
-
 def createData(xChunks, yChunks, imageToBreak, points):
     image_1_kp = []
     for i in range(0, xChunks * yChunks):
@@ -269,30 +263,38 @@ def createData(xChunks, yChunks, imageToBreak, points):
     yLen = imageToBreak.shape[0]
     xLen = imageToBreak.shape[1]
 
-
-            # imageBroken.append(imageToBreak[0:len(imageToBreak)/2,:])
-            # imageBroken.append(imageToBreak[len(imageToBreak)/2:len(imageToBreak),:])
-
     imageBroken = []
     for yChunk in range(0, yLen, yLen / yChunks):
         for xChunk in range(0, xLen, xLen / xChunks):
             imageBroken.append(imageToBreak[yChunk:yChunk + yLen / yChunks, xChunk:xChunk + xLen / xChunks])
 
-    return image_1_kp, imageBroken
+    image_2_kp = []
+    for i in range(0, xChunks * yChunks):
+        image_2_kp.append([[0, 0], [imageBroken[i].shape[1],0], [0, imageBroken[i].shape[0]], [imageBroken[i].shape[1], imageBroken[i].shape[0]]])
 
-# print createData(1,2,img2,points)
-
-
-image_1_kp, img2 = createData(1, 2, img2, points)
-# print image_1_kp
-
-image_2_kp = [[[0, 0], [img2[0].shape[1],0], [0, img2[0].shape[0]], [img2[0].shape[1], img2[0].shape[0]]],[[0, 0], [img2[1].shape[1],0], [0, img2[1].shape[0]], [img2[1].shape[1], img2[1].shape[0]]]]
+    return image_1_kp, imageBroken, image_2_kp
 
 
-for chunk in range(0, 2):
-    H = findHomography(image_2_kp[chunk], image_1_kp[chunk])
-    finalImage = cv2.warpPerspective(img2[chunk],H,(img.shape[1], img.shape[0]))
-    colorOriginal = addNewChunk(colorOriginal, finalImage)
+
+
+def dropOffFinalImage( xChunks, yChunks, displayImage, originalImage, swapImage, points):
+    image_1_kp, swapImage, image_2_kp = createData(1, 2, swapImage, points)
+
+
+    for chunk in range(0, xChunks * yChunks):
+        H = findHomography(image_2_kp[chunk], image_1_kp[chunk])
+        finalImage = cv2.warpPerspective(swapImage[chunk], H, (originalImage.shape[1], originalImage.shape[0]))
+        displayImage = addNewChunk(displayImage, finalImage)
+    return displayImage
+
+
+
+
+points = [[123, 340], [194, 299], [165, 385], [238, 359], [178, 443], [258, 445]]
+img2 = cv2.imread('Dispatcher.png')
+colorOriginal = cv2.imread('bean.png')
+
+colorOriginal = dropOffFinalImage(1,2,colorOriginal, img, img2, points)
 
 cv2.imwrite( 'final.png', colorOriginal)
 
