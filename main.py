@@ -8,6 +8,13 @@ import scipy.signal
 # cv.waitKey(0)
 # cv.destroyAllWindows()
 
+def addNewChunk(originalImage, warpedImage):
+    for y in range(0, originalImage.shape[0]):
+        for x in range(0, originalImage.shape[1]):
+            if ( warpedImage[y, x][0] != 0 ) and ( warpedImage[y, x][1] != 0 ) and ( warpedImage[y, x][2] != 0 ):
+                originalImage[y,x] = warpedImage[y,x]
+    return originalImage
+
 def getImageCorners(image):
     corners = np.zeros((4, 1, 2), dtype=np.float32)
     # WRITE YOUR CODE HERE
@@ -247,42 +254,42 @@ img = cv2.imread('bean.png')
 # cv2.destroyAllWindows()
 
 
+points = [[123, 340], [194, 299], [165, 385], [238, 359], [178, 443], [258, 445]]
+
+
 img2 = cv2.imread('Dispatcher.png')
-img2A = img2[0:len(img2)/2,:]
-img2B = img2[len(img2)/2:len(img2),:]
-
-image_1_kpA = [[123, 340], [194, 299], [165, 385], [238, 359]]
-image_1_kpB = [[165, 385], [238, 359], [178, 443], [258, 445]]
-
-image_2_kpA = [[0, 0], [img2A.shape[1],0], [0, img2A.shape[0]], [img2A.shape[1], img2A.shape[0]]]
-image_2_kpB = [[0, 0], [img2B.shape[1],0], [0, img2B.shape[0]], [img2B.shape[1], img2B.shape[0]]]
-
-HA = findHomography(image_2_kpA, image_1_kpA)
-HB = findHomography(image_2_kpB, image_1_kpB)
-
-finalImageA = cv2.warpPerspective(img2A,HA,(img.shape[1], img.shape[0]))
-finalImageB = cv2.warpPerspective(img2B,HB,(img.shape[1], img.shape[0]))
-
 colorOriginal = cv2.imread('bean.png')
 
-for y in range(0, colorOriginal.shape[0]):
-	for x in range(0, colorOriginal.shape[1]):
-		if ( finalImageA[y, x][0] != 0 ) and ( finalImageA[y, x][1] != 0 ) and ( finalImageA[y, x][2] != 0 ):
-			colorOriginal[y,x][0] = finalImageA[y,x][0]
-			colorOriginal[y,x][1] = finalImageA[y,x][1]
-			colorOriginal[y,x][2] = finalImageA[y,x][2]
+def createData(xChunks, yChunks, imageToBreak, points):
+    image_1_kp = []
+    for i in range(0, xChunks * yChunks):
+        image_1_kp.append([points[i + i / xChunks],points[i + i / xChunks + 1],points[i + i / xChunks + xChunks + 1],points[i + i / xChunks + xChunks + 2]])
+
+    return image_1_kp
+
+# print createData(1,2,img2,points)
 
 
-for y in range(0, colorOriginal.shape[0]):
-	for x in range(0, colorOriginal.shape[1]):
-		if ( finalImageB[y, x][0] != 0 ) and ( finalImageB[y, x][1] != 0 ) and ( finalImageB[y, x][2] != 0 ):
-			colorOriginal[y,x][0] = finalImageB[y,x][0]
-			colorOriginal[y,x][1] = finalImageB[y,x][1]
-			colorOriginal[y,x][2] = finalImageB[y,x][2]
 
+
+img2 = [img2[0:len(img2)/2,:],img2[len(img2)/2:len(img2),:]]
+
+# image_1_kp = [[[123, 340], [194, 299], [165, 385], [238, 359]],[[165, 385], [238, 359], [178, 443], [258, 445]]]
+image_1_kp = createData(1, 2, img2, points)
+# print image_1_kp
+
+image_2_kp = [[[0, 0], [img2[0].shape[1],0], [0, img2[0].shape[0]], [img2[0].shape[1], img2[0].shape[0]]],[[0, 0], [img2[1].shape[1],0], [0, img2[1].shape[0]], [img2[1].shape[1], img2[1].shape[0]]]]
+
+
+for chunk in range(0, 2):
+    H = findHomography(image_2_kp[chunk], image_1_kp[chunk])
+    finalImage = cv2.warpPerspective(img2[chunk],H,(img.shape[1], img.shape[0]))
+    colorOriginal = addNewChunk(colorOriginal, finalImage)
 
 cv2.imwrite( 'final.png', colorOriginal)
 
 cv2.imshow('detected circles',colorOriginal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
+
+
