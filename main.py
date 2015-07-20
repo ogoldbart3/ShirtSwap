@@ -259,7 +259,6 @@ def createData(xChunks, yChunks, imageToBreak, points):
     for i in range(0, xChunks * yChunks):
         image_1_kp.append([points[i + i / xChunks],points[i + i / xChunks + 1],points[i + i / xChunks + xChunks + 1],points[i + i / xChunks + xChunks + 2]])
 
-
     yLen = imageToBreak.shape[0]
     xLen = imageToBreak.shape[1]
 
@@ -278,8 +277,7 @@ def createData(xChunks, yChunks, imageToBreak, points):
 
 
 def dropOffFinalImage( xChunks, yChunks, displayImage, originalImage, swapImage, points):
-    image_1_kp, swapImage, image_2_kp = createData(1, 2, swapImage, points)
-
+    image_1_kp, swapImage, image_2_kp = createData(xChunks, yChunks, swapImage, points)
 
     for chunk in range(0, xChunks * yChunks):
         H = findHomography(image_2_kp[chunk], image_1_kp[chunk])
@@ -289,12 +287,12 @@ def dropOffFinalImage( xChunks, yChunks, displayImage, originalImage, swapImage,
 
 
 
-
-points = [[123, 340], [194, 299], [165, 385], [238, 359], [178, 443], [258, 445]]
+# points = [[123, 340], [194, 299], [165, 385], [238, 359], [178, 443], [258, 445]]
+points = [[123, 340], [154,305], [194, 299], [165, 385], [197,363], [238, 359], [178, 443], [212,443], [258, 445]]
 img2 = cv2.imread('Dispatcher.png')
 colorOriginal = cv2.imread('bean.png')
 
-colorOriginal = dropOffFinalImage(1,2,colorOriginal, img, img2, points)
+colorOriginal = dropOffFinalImage(2,2,colorOriginal, img, img2, points)
 
 cv2.imwrite( 'final.png', colorOriginal)
 
