@@ -11,65 +11,11 @@ points = []
 def addNewChunk(originalImage, warpedImage):
     for y in range(0, originalImage.shape[0]):
         for x in range(0, originalImage.shape[1]):
-            if ( warpedImage[y, x][0] != 0 ) and ( warpedImage[y, x][1] != 0 ) and ( warpedImage[y, x][2] != 0 ):
+            if ( warpedImage[y, x][0] != 0 ) or ( warpedImage[y, x][1] != 0 ) or ( warpedImage[y, x][2] != 0 ):
                 originalImage[y,x] = warpedImage[y,x]
+
     return originalImage
 
-def getImageCorners(image):
-    corners = np.zeros((4, 1, 2), dtype=np.float32)
-    # WRITE YOUR CODE HERE
-
-    corners[0][0] = [0,0]
-    corners[1][0] = [0,image.shape[0]]
-    corners[2][0] = [image.shape[1],0]
-    corners[3][0] = [image.shape[1],image.shape[0]]
-
-    return corners
-
-def warpImagePair(image_1, image_2, homography):
-    
-    # Store the result of cv2.warpPerspective in this variable.
-    warped_image = None
-    # The minimum and maximum values of your corners.
-    x_min = 0
-    y_min = 0
-    x_max = 0
-    y_max = 0
-
-    # WRITE YOUR CODE HERE
-
-    image_1_corners = getImageCorners(image_1)
-    image_2_corners = getImageCorners(image_2)
-
-    warped_image_corners = np.zeros((4, 1, 2), dtype=np.float32)
-
-    for i in range(0, len(image_1_corners)):
-        x = image_1_corners[i][0][0]
-        y = image_1_corners[i][0][1]
-        warped_image_corners[i][0] = [(homography[0][0] * x + homography[0][1] * y + homography[0][2] )/(homography[2][0]+homography[2][1]+1), (homography[1][0] * x + homography[1][1] * y + homography[1][2] )/(homography[2][0]+homography[2][1]+1)]
-
-    for i in range( 0, len( warped_image_corners )):
-        x_min = min(x_min, warped_image_corners[i][0][0], image_2_corners[i][0][0] )
-        y_min = min(y_min, warped_image_corners[i][0][1], image_2_corners[i][0][1] )
-        x_max = max(x_max, warped_image_corners[i][0][0], image_2_corners[i][0][0] )
-        y_max = max(y_max, warped_image_corners[i][0][1], image_2_corners[i][0][1] )
-
-    all_corners = np.zeros((8,1,2), dtype=np.float32)
-
-    for i in range(0,len(warped_image_corners)):
-        all_corners[i] = warped_image_corners[i]
-        all_corners[i+4] = image_2_corners[i]
-
-    translation_array = np.zeros((3, 3), dtype = np.float32 )
-    translation_array[0] = [ 1, 0, -1 * x_min ]
-    translation_array[1] = [ 0, 1, -1 * y_min ]
-    translation_array[2] = [ 0, 0, 1 ]
-
-    combination_matrix = np.dot( translation_array, homography )
-
-    warped_image = cv2.warpPerspective(image_1,combination_matrix,(x_max - x_min, y_max - y_min))
-
-    return warped_image
 
 def findHomography(image_1_kp, image_2_kp):
 
@@ -88,33 +34,14 @@ def findHomography(image_1_kp, image_2_kp):
     return output[0]
     # END OF FUNCTION
 
-def order_points(pts):
-	# initialzie a list of coordinates that will be ordered
-	# such that the first entry in the list is the top-left,
-	# the second entry is the top-right, the third is the
-	# bottom-right, and the fourth is the bottom-left
-	rect = np.zeros((4, 2), dtype = "float32")
- 
-	# the top-left point will have the smallest sum, whereas
-	# the bottom-right point will have the largest sum
-	s = pts.sum(axis = 1)
-	rect[0] = pts[np.argmin(s)]
-	rect[2] = pts[np.argmax(s)]
- 
-	# now, compute the difference between the points, the
-	# top-right point will have the smallest difference,
-	# whereas the bottom-left will have the largest difference
-	diff = np.diff(pts, axis = 1)
-	rect[1] = pts[np.argmin(diff)]
-	rect[3] = pts[np.argmax(diff)]
- 
-	# return the ordered coordinates
-	return rect
-
 def createData(xChunks, yChunks, imageToBreak, points):
     image_1_kp = []
-    for i in range(0, xChunks * yChunks):
-        image_1_kp.append([points[i + i / xChunks],points[i + i / xChunks + 1],points[i + i / xChunks + xChunks + 1],points[i + i / xChunks + xChunks + 2]])
+    # for i in range(0, xChunks * yChunks):
+    #     image_1_kp.append([points[i + i / xChunks],points[i + i / xChunks + 1],points[i + i / xChunks + xChunks + 1],points[i + i / xChunks + xChunks + 2]])
+
+    for y in range(0, yChunks):
+        for x in range(0, xChunks):
+            image_1_kp.append([ points[y*(xChunks+1) + x], points[y*(xChunks+1) + x + 1], points[(y+1)*(xChunks+1) + x], points[(y + 1)*(xChunks+1) + x + 1]])
 
     yLen = imageToBreak.shape[0]
     xLen = imageToBreak.shape[1]
@@ -145,6 +72,7 @@ def click(event, x, y, flags, param):
     global points
     if event == cv2.EVENT_LBUTTONUP:
         points.append([x, y])
+        image[y-2:y+2,x-2:x+2] = [0,255,0]
  
         print [x, y]
 
@@ -185,8 +113,6 @@ while len(points) < (x + 1) * (y + 1):
 
 cv2.destroyAllWindows()
 
-# pointsForGood3 = [[116,293], [139,258], [148,228], [146,320], [168,286], [191,254], [166,337], [193,313], [214,286], [168,371], [202,359], [228,330]]
-
 colorOriginal = dropOffFinalImage(x,y,colorOriginal, image, swap, points)
 
 cv2.imwrite( 'final.png', colorOriginal)
@@ -194,5 +120,3 @@ cv2.imwrite( 'final.png', colorOriginal)
 cv2.imshow('detected circles',colorOriginal)
 cv2.waitKey(0)
 cv2.destroyAllWindows()
-
-
